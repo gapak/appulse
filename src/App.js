@@ -7,9 +7,11 @@ import './css/App.css';
 import './css/footer.css';
 
 import {game_name} from './game/app_config';
-import {getDefaultState, default_points} from './game/default_state';
+import {getDefaultState} from './game/default_state';
 import {frame} from './game/frame';
 import {tick} from './game/tick';
+
+import {isEnough, chargeCost} from './core/bdcgin';
 
 import {resources} from './game/resources';
 import {buildings} from './game/buildings';
@@ -96,8 +98,8 @@ class App extends Component {
 
     onClickWrapper(item) {
         if (item.cost) {
-            if (this.isEnough(this.state, item.cost)) {
-                if (item.onClick) this.setState(item.onClick(this.chargeCost(this.state, item.cost)));
+            if (isEnough(this.state, item.cost)) {
+                if (item.onClick) this.setState(item.onClick(chargeCost(this.state, item.cost)));
 
             }
             else { return false; }
@@ -117,22 +119,6 @@ class App extends Component {
         return text;
     };
 
-    isEnough(state, cost) {
-        let enough = true;
-        _.each(cost, (value, resource_key) => {
-            if (state[resource_key] < value) enough = false;
-        });
-        return enough;
-    }
-
-    chargeCost(state, cost) {
-        if (!this.isEnough(this.state, cost)) return false;
-        _.each(cost, (value, resource_key) => {
-            state[resource_key] -= value;
-        });
-        return state;
-    }
-
     changeTab(tab_name) {
         this.setState({tab: tab_name});
     }
@@ -141,7 +127,7 @@ class App extends Component {
 
     render() {
 
-        const badge = (state, item, child) => <OverlayTrigger delay={150} placement="right" overlay={tooltip(state, item)}>{child}</OverlayTrigger>;
+        const badge = (state, item, child) => <OverlayTrigger delay={150} placement="top" overlay={tooltip(state, item)}>{child}</OverlayTrigger>;
 
         const tooltip = (state, item) =>
             <Tooltip id="tooltip">
@@ -184,7 +170,7 @@ class App extends Component {
                                 <span>
                                     {this.state[key] ? <span>{item.name}: {this.state[key]}</span> : ''}
                                     {<button
-                                        className={(item.cost ? this.isEnough(this.state, item.cost) ? '' : 'disabled' : '')}
+                                        className={(item.cost ? isEnough(this.state, item.cost) ? '' : 'disabled' : '')}
                                         onClick={() => { this.onClickWrapper(item); }}>
                                         Buy {item.name}
                                     </button>}
@@ -207,7 +193,7 @@ class App extends Component {
                                 <span>
                                     {this.state[key] ? <span>{item.name}: {this.state[key]}</span> : ''}
                                     {<button
-                                        className={(item.cost ? this.isEnough(this.state, item.cost) ? '' : 'disabled' : '')}
+                                        className={(item.cost ? isEnough(this.state, item.cost) ? '' : 'disabled' : '')}
                                         onClick={() => { this.onClickWrapper(item); }}>
                                         Buy {item.name}
                                     </button>}
@@ -240,7 +226,7 @@ class App extends Component {
                                         <div className="row slim">
                                             <span className="col-xs-6 badge">{item.name}</span>
                                             <span className="col-xs-6">
-                                                <button className={(item.cost ? this.isEnough(this.state, item.cost) ? '' : 'disabled' : '')}
+                                                <button className={(item.cost ? isEnough(this.state, item.cost) ? '' : 'disabled' : '')}
                                                         onClick={() => { this.onClickWrapper(item); }}> Buy for {item.cost.points}
                                                 </button>
                                             </span>
