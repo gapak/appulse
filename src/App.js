@@ -11,14 +11,14 @@ import {getDefaultState} from './game/default_state';
 import {frame} from './game/frame';
 import {tick} from './game/tick';
 
-import {isEnough, chargeCost} from './core/bdcgin';
+import {isEnough, chargeCost, drawCost} from './core/bdcgin';
 
 import {resources} from './game/resources';
 import {buildings} from './game/buildings';
 import {research} from './game/research';
 import {ships} from './game/ships';
 import {sortFleet} from './game/fleets';
-import {shop} from './game/shop';
+import {shipyard} from './game/shipyard';
 import {data} from './game/data';
 
 
@@ -84,14 +84,14 @@ class App extends Component {
         state = frame(this.state);
         state.frame++;
 
-    //    localStorage.setItem(game_name+"_app_state", JSON.stringify(state));
+        localStorage.setItem(game_name+"_app_state", JSON.stringify(state));
         this.setState(state);
         if (state.game_end) this.pauseGame();
     }
 
     tick(initial_state) {
         let state = tick(initial_state);
-     //   localStorage.setItem(game_name+"_app_state", JSON.stringify(state));
+    //    localStorage.setItem(game_name+"_app_state", JSON.stringify(state));
         return state; // this.setState(state);
     }
 
@@ -109,16 +109,6 @@ class App extends Component {
         }
     }
 
-    drawCost(cost) {
-        let text = '';
-        _.each(cost, (value, resource) => {
-            if (value > 0) {
-                text += resource + ': ' + value + ' ';
-            }
-        });
-        return text;
-    };
-
     changeTab(tab_name) {
         this.setState({tab: tab_name});
     }
@@ -127,7 +117,7 @@ class App extends Component {
 
     render() {
 
-        const badge = (state, item, child) => <OverlayTrigger delay={150} placement="top" overlay={tooltip(state, item)}>{child}</OverlayTrigger>;
+        const badge = (state, item, child) => <OverlayTrigger delay={150} placement="bottom" overlay={tooltip(state, item)}>{child}</OverlayTrigger>;
 
         const tooltip = (state, item) =>
             <Tooltip id="tooltip">
@@ -161,20 +151,63 @@ class App extends Component {
         const economy_subcomponent = <div className="row slim">
             {resouces_subcomponent}
             <div className="col-xs-8 flex-container-column slim">
+                {this.state.buildings.length > 0 ? <h4>Buildings:</h4> : ''}
+                {_.map(this.state.buildings, (item, key) =>
+                    <div key={key}>
+                        <OverlayTrigger delay={150} placement="bottom" overlay={tooltip(this.state, buildings[item.name])}>
+                            <div className="panel">
+                                <div style={{opacity: item.deactivated ? 0.5 : 1}}>{buildings[item.name].name}</div>
+                                {buildings[item.name].is_activable
+                                    ? <div>
+                                        <button onClick={() => {
+                                            let state = this.state;
+                                            state.buildings[key].deactivated = !item.deactivated;
+                                            this.setState(state);
+                                        }}>{item.deactivated ? "ON" : "OFF"}</button>
+                                      </div>
+                                    : <div>Active</div>
+                                }
+
+                                <div style={{opacity: item.deactivated ? 0.5 : 1}}>
+                                    {buildings[item.name].modes ?
+                                        <div className="flex-container-row slim">
+                                            {_.map(buildings[item.name].modes, (mode, mode_key) =>
+                                                <span key={mode_key} className="flex-element">
+                                                    <button style={{fontWeight: this.state.buildings[key].mode === mode.name ? 'bold' : 'normal'}} onClick={() => {
+                                                        let state = this.state;
+                                                        state.buildings[key].mode = mode.name;
+                                                        this.setState(state);
+                                                    }}>{mode.name}</button>
+                                                </span>
+                                            )}
+                                        </div> : ''
+                                    }
+                                    <div>
+                                        {buildings[item.name].modes || false === true ? <div>{buildings[item.name].modes[item.mode].formula}</div> : <div>{buildings[item.name].formula}</div>}
+                                    </div>
+                                </div>
+                            </div>
+                        </OverlayTrigger>
+                    </div>
+                )}
+
+
+                <h4>Construction:</h4>
                 {_.map(buildings, (item, key) =>
-                    (item.locked && item.locked(this.state))
+                    (item.isLocked && item.isLocked(this.state))
                         ? ''
                         :
                         <div key={key}>
-                            <OverlayTrigger delay={150} placement="left" overlay={tooltip(this.state, item)}>
-                                <span>
-                                    {this.state[key] ? <span>{item.name}: {this.state[key]}</span> : ''}
-                                    {<button
-                                        className={(item.cost ? isEnough(this.state, item.cost) ? '' : 'disabled' : '')}
+                            <OverlayTrigger delay={150} placement="bottom" overlay={tooltip(this.state, item)}>
+                                <div className="panel">
+                                    <div>{item.name}</div>
+                                    <div>{<button
+                                        className={(item.isDisabled && item.isDisabled(this.state)) ? 'disabled' : (item.cost ? isEnough(this.state, item.cost) ? '' : 'disabled' : '')}
                                         onClick={() => { this.onClickWrapper(item); }}>
-                                        Buy {item.name}
-                                    </button>}
-                                </span>
+                                        Buy
+                                    </button>}</div>
+                                    <div>{drawCost(item.cost)}</div>
+                                </div>
                             </OverlayTrigger>
                         </div>
                 )}
@@ -185,11 +218,11 @@ class App extends Component {
             {resouces_subcomponent}
             <div className="col-xs-8 flex-container-column slim">
                 {_.map(research, (item, key) =>
-                    (item.locked && item.locked(this.state))
+                    (item.isLocked && item.isLocked(this.state))
                         ? ''
                         :
                         <div key={key}>
-                            <OverlayTrigger delay={150} placement="left" overlay={tooltip(this.state, item)}>
+                            <OverlayTrigger delay={150} placement="bottom" overlay={tooltip(this.state, item)}>
                                 <span>
                                     {this.state[key] ? <span>{item.name}: {this.state[key]}</span> : ''}
                                     {<button
@@ -216,8 +249,8 @@ class App extends Component {
                         <div className="col-xs-2 slim badge">{badge(this.state, data.rof, <span>rof</span>)}</div>
                         <div className="col-xs-2 slim"></div>
                     </div>
-                    {_.map(shop, (item, key) =>
-                        (item.locked && item.locked(this.state))
+                    {_.map(shipyard, (item, key) =>
+                        (item.isLocked && item.isLocked(this.state))
                             ? ''
                             :
                             <div key={key} className="panel">

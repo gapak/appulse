@@ -48,42 +48,9 @@ const default_state = {
     epoch_4: false,
     epoch_5: false,
 
+    tech: [],
+    buildings: [],
 
-    h2_generator: 0,
-    c_generator: 0,
-    ch4_generator: 0,
-    solar_generator: 0,
-
-    mine: 0,
-    pump: 0,
-
-    h2_smelt: 0,
-    c_smelt: 0,
-    ch4_smelt: 0,
-    e_smelt: 0,
-
-    chemical: 0,
-    bioreactor: 0,
-
-    micro_facility: 0,
-    nano_facility: 0,
-    block_facility: 0,
-    organic_facility: 0,
-
-    comp_factory: 0,
-    robot_factory: 0,
-    module_factory: 0,
-    bionic_factory: 0,
-
-    satellite_shipyard: 0,
-    frigate_shipyard: 0,
-    destroyer_shipyard: 0,
-    cruiser_shipyard: 0,
-    dreadnought_shipyard: 0,
-    battlecruiser_shipyard: 0,
-    battleship_shipyard: 0,
-    carrier_shipyard: 0,
-    titan_shipyard: 0,
 
 
 

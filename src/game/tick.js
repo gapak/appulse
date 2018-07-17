@@ -11,8 +11,8 @@ export const tick = (state) => {
         if (item.onTick) state = item.onTick(state);
     });
 
-    _.each(buildings, (item) => {
-        if (item.onTick) state = item.onTick(state);
+    _.each(state.buildings, (item, id) => {
+        if (buildings[item.name].onTick) state = buildings[item.name].onTick(state, id);
     });
 
     return state;
