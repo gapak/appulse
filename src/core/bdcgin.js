@@ -58,8 +58,17 @@ export function buy(state, key) {
 }
 
 export function add(state, building, cost) {
-    state[building]++;
+
     return state;
+}
+
+export function isBuilt(state, building_name) {
+    console.log(state, building_name);
+
+    console.log(_.find(state.buildings, function(building) { return building.name === building_name; }));
+    console.log((_.find(state.buildings, function(building) { return building.name === building_name; })));
+
+    return (_.find(state.buildings, function(building) { return building.name === building_name }));
 }
 
 export function convert(state, building_id, cost1, cost2) {

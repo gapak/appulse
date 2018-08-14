@@ -66,7 +66,7 @@ class App extends Component {
     }
 
     newGame() {
-       // if (!window.confirm('Are you ready to start a new game? Your progress will be lost.')) return false;
+        // if (!window.confirm('Are you ready to start a new game? Your progress will be lost.')) return false;
         localStorage.setItem(game_name+"_app_state", null);
         let new_state = getDefaultState();
         this.setState(new_state);
@@ -190,6 +190,7 @@ class App extends Component {
                         </OverlayTrigger>
                     </div>
                 )}
+
 
 
                 <h4>Construction:</h4>
