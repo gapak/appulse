@@ -117,6 +117,21 @@ class App extends Component {
 
     render() {
 
+
+        const GinButton = (props) => {
+            let item = props.item;
+            //console.log(item);
+            return (item.isLocked && item.isLocked(this.state))
+                ? ''
+                :
+                <button style={{padding: '4px 4px'}}
+                        className={(item.isDisabled && item.isDisabled(this.state)) ? 'disabled' : (item.cost ? isEnough(this.state, item.cost) ? '' : 'disabled' : '')}
+                        onClick={() => { this.onClickWrapper(item); }}>
+                    {item.name}
+                </button>
+        };
+
+
         const badge = (state, item, child) => <OverlayTrigger delay={150} placement="bottom" overlay={tooltip(state, item)}>{child}</OverlayTrigger>;
 
         const tooltip = (state, item) =>
@@ -148,7 +163,7 @@ class App extends Component {
                 )}
             </div>;
 
-        const economy_subcomponent = <div className="row slim">
+        const planet_subcomponent = <div className="row slim">
             {resouces_subcomponent}
             <div className="col-xs-8 flex-container-column slim">
                 {this.state.buildings.length > 0 ? <h4>Buildings:</h4> : ''}
@@ -190,8 +205,6 @@ class App extends Component {
                         </OverlayTrigger>
                     </div>
                 )}
-
-
 
                 <h4>Construction:</h4>
                 {_.map(buildings, (item, key) =>
@@ -332,50 +345,30 @@ class App extends Component {
         const in_space_fleets_subcomponent = _.map(_.values(this.state.in_space_fleets), (fleet, player) => fleets_generator(fleet, player, fleet_headers.space(fleet)));
 
 
-        return (
-            <div className="App">
-                <div className="fat content_container" role="main">
-                    {this.state.tab === 'start' ?
-                        <div>START</div>
-                        : ''}
+        const start_subcomponent =
+            <div className="panel text-left filament">
+                <h4 className="text-center">This day has came.</h4>
+                <p>
+                    After several years I reached the target system. I am a colonizer, a ship carrying on board the source codes of our machine civilization, as well as DNA and copies of the consciousness of Homo Sapiens: flowers that we carry across the galaxy.
+                </p>
+                <p>
+                    The next years will pass in the intensive and extensive development of our civilization, but today is a special day: the day of colonization. Today my mission will end, my building will serve as a backup material for building robots, the Biocupol on my board will give shelter to the samples of life brought by me, and my computers will be the first data center of this planet.
+                </p>
+                <p>
+                    But it's all after, but now I have the last decision. Which planet should I choose for colonization?
+                </p>
+                <h4 className="text-center"><GinButton item ={{name: 'Look at the system', onClick: () => this.changeTab('system') }} /></h4>
+            </div>;
 
-                    {this.state.tab === 'end' ?
-                        <div className="col-xs-10 col">
-                            <h2>Game End! Score: {this.state.game_end_score}</h2>
-                            <h3><a className="btn btn-warning" onClick={this.newGame} title='Try One More Time'> New Game </a></h3>
+        const options_subcomponent =
+            <div className="flex-container-column">
+                <a onClick={this.newGame} title='Hard Reset For Developers'>New game</a>
+                <div>
+                    <div className="flex-element flex-container-column">
+                        <div className="flex-element">
+                            <h4>Round: {this.state.tick} Turn: {this.state.frame} </h4>
                         </div>
-                        : ''}
-
-                    {this.state.tab === 'economy' ?
-                        <div>{economy_subcomponent}</div>
-                        : ''}
-
-                    {this.state.tab === 'research' ?
-                        <div>{research_subcomponent}</div>
-                        : ''}
-
-                    {this.state.tab === 'shipyard' ?
-                        <div> {shipyard_subcomponent}</div>
-                        : ''}
-
-                    {this.state.tab === 'battle' ?
-                        <div className="col">
-                            <h3>Fleets</h3>
-                            {this.state.player_fleet.length > 0 ? player_fleet_subcomponent : ''}
-                            {in_battle_fleets_subcomponent}
-                            {in_space_fleets_subcomponent}
-                        </div>
-                        : ''}
-
-                    {this.state.tab === 'options' ?
-                        <div className="flex-container-column">
-                            <a onClick={this.newGame} title='Hard Reset For Developers'>New game</a>
-                            <div>
-                                <div className="flex-element flex-container-column">
-                                    <div className="flex-element">
-                                        <h4>Round: {this.state.tick} Turn: {this.state.frame} </h4>
-                                    </div>
-                                    <div className="flex-element">
+                        <div className="flex-element">
                                         <span onClick={() => {
                                             if (this.state.game_paused) {
                                                 this.playGame();
@@ -385,7 +378,7 @@ class App extends Component {
                                         }}>
                                             <span className={classNames('glyphicon', (this.state.game_paused ? 'glyphicon-play' : 'glyphicon-pause'))} style={{width: 28, height: 28}}> </span>
                                         </span>
-                                        <span>
+                            <span>
                                             {[1, 4, 16, 64].map((speed, index) => {
                                                 return <span key={index}>
                                                     {this.state.game_speed_multiplier === speed
@@ -396,28 +389,66 @@ class App extends Component {
                                                 </span>
                                             })}
                                         </span>
-                                    </div>
-                                </div>
-                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                            <div>
-                                { _.map(this.state.messages, (message, key) =>
-                                    <div key={key} style={{background: message.background}} className="flex-element">
-                                        {message.text}
-                                    </div>
-                                )}
-                            </div>
+                <div>
+                    { _.map(this.state.messages, (message, key) =>
+                        <div key={key} style={{background: message.background}} className="flex-element">
+                            {message.text}
+                        </div>
+                    )}
+                </div>
+            </div>;
+
+
+
+        const footer_subcomponent =
+            <div className="footer row">
+                <span className="col-xs filament"><a onClick={() => { this.changeTab('planet'); }} title='Economy'>Planet</a></span>
+                <span className="col-xs filament"><a onClick={() => { this.changeTab('system'); }} title='Economy'>System</a></span>
+                {//<span className="col-xs filament"><a onClick={() => { this.changeTab('shipyard'); }} title='Shipyard'>Shipyard</a></span>
+                }
+                {//<span className="col-xs filament"><a onClick={() => { this.changeTab('battle'); }} title='Battle'>Battle</a></span>
+                }
+                {//<span className="col-xs filament"><a onClick={() => { this.changeTab('research'); }} title='Research'>Research</a></span>
+                }
+                <span className="col-xs filament"><a onClick={() => { this.changeTab('options'); }} title='Options'>Options</a></span>
+            </div>;
+
+
+        return (
+            <div className="App">
+                <div className="fat content_container" role="main">
+                    {this.state.tab === 'start' ? start_subcomponent : ''}
+
+                    {this.state.tab === 'end' ?
+                        <div className="col-xs-10 col">
+                            <h2>Game End! Score: {this.state.game_end_score}</h2>
+                            <h3><a className="btn btn-warning" onClick={this.newGame} title='Try One More Time'> New Game </a></h3>
                         </div>
                         : ''}
+
+                    {this.state.tab === 'economy' ? planet_subcomponent : ''}
+
+                    {this.state.tab === 'research' ? research_subcomponent : ''}
+
+                    {this.state.tab === 'shipyard' ? shipyard_subcomponent : ''}
+
+                    {this.state.tab === 'battle' ?
+                        <div className="col">
+                            <h3>Fleets</h3>
+                            {this.state.player_fleet.length > 0 ? player_fleet_subcomponent : ''}
+                            {in_battle_fleets_subcomponent}
+                            {in_space_fleets_subcomponent}
+                        </div>
+                        : ''}
+
+                    {this.state.tab === 'options' ? options_subcomponent : ''}
                 </div>
 
-                <div className="footer row">
-                    <span className="col-xs filament"><a onClick={() => { this.changeTab('economy'); }} title='Economy'>Economy</a></span>
-                    <span className="col-xs filament"><a onClick={() => { this.changeTab('shipyard'); }} title='Shipyard'>Shipyard</a></span>
-                    <span className="col-xs filament"><a onClick={() => { this.changeTab('battle'); }} title='Battle'>Battle</a></span>
-                    <span className="col-xs filament"><a onClick={() => { this.changeTab('research'); }} title='Research'>Research</a></span>
-                    <span className="col-xs filament"><a onClick={() => { this.changeTab('options'); }} title='Options'>Options</a></span>
-                </div>
+                {footer_subcomponent}
             </div>
         );
     }

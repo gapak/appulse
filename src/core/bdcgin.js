@@ -2,18 +2,24 @@
 import _ from 'lodash';
 import {buildings} from '../game/buildings';
 
+
 export function isEnough(state, cost) {
     let enough = true;
     _.each(cost, (value, resource_key) => {
-        if (state[resource_key] < value) enough = false;
+        if (_.get(state, resource_key) < value) enough = false;
+        // console.log(_.get(state, resource_key), resource_key);
     });
+
+    //console.log(state, cost, enough);
+
     return enough;
 }
 
 export function chargeCost(state, cost) {
     if (!isEnough(state, cost)) return false;
     _.each(cost, (value, resource_key) => {
-        state[resource_key] -= value;
+        let result = _.get(state, resource_key) - value;
+        _.set(state, resource_key, result);
     });
     return state;
 }
@@ -63,10 +69,10 @@ export function add(state, building, cost) {
 }
 
 export function isBuilt(state, building_name) {
-    console.log(state, building_name);
+    //console.log(state, building_name);
 
-    console.log(_.find(state.buildings, function(building) { return building.name === building_name; }));
-    console.log((_.find(state.buildings, function(building) { return building.name === building_name; })));
+    //console.log(_.find(state.buildings, function(building) { return building.name === building_name; }));
+    //console.log((_.find(state.buildings, function(building) { return building.name === building_name; })));
 
     return (_.find(state.buildings, function(building) { return building.name === building_name }));
 }
